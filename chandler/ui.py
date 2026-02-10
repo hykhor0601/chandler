@@ -94,12 +94,20 @@ def print_memory(memory_data: dict):
     console.print(Panel("\n".join(lines), title="Memory", border_style="magenta"))
 
 
+def print_profile(profile_text: str):
+    """Display user profile in a formatted panel."""
+    from rich.markdown import Markdown
+    console.print(Panel(Markdown(profile_text), title="Your Profile", border_style="cyan"))
+
+
 def print_help():
     """Print available commands."""
     console.print(
         Panel(
             "[bold]/help[/bold]    — Show this help\n"
-            "[bold]/memory[/bold]  — Show stored memories\n"
+            "[bold]/profile[/bold] — Show your complete profile\n"
+            "[bold]/memory[/bold]  — Show stored memories (legacy)\n"
+            "[bold]/mode[/bold]    — Show current mode (Buddy/Research)\n"
             "[bold]/clear[/bold]   — Clear conversation history\n"
             "[bold]/quit[/bold]    — Exit Chandler",
             title="Commands",

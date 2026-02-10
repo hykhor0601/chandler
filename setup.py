@@ -14,6 +14,7 @@ setup(
     entry_points={
         "console_scripts": [
             "chandler=chandler.main:main",
+            "chandler-voice=chandler.menu_bar_app:main",
         ],
     },
     package_data={

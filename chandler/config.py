@@ -91,6 +91,10 @@ class Config:
         return self._data.get("max_tokens", 4096)
 
     @property
+    def api_timeout(self) -> float:
+        return self._data.get("api_timeout", 300.0)
+
+    @property
     def vision_model(self) -> dict:
         return self._data.get("vision_model", _DEFAULTS["vision_model"])
 
@@ -110,6 +114,43 @@ class Config:
     @property
     def memory_settings(self) -> dict:
         return self._data.get("memory", _DEFAULTS["memory"])
+
+    @property
+    def extended_thinking(self) -> dict:
+        return self._data.get("extended_thinking", {
+            "enabled": False,
+            "budget_tokens": 10000,
+            "min_budget": 1024,
+            "max_budget": 64000,
+        })
+
+    @property
+    def voice_mode(self) -> dict:
+        return self._data.get("voice_mode", {
+            "enabled": True,
+            "wake_word": "chandler",
+            "wake_word_contains": True,
+            "wake_word_asr": {
+                "provider": "apple_speech",
+                "confidence_threshold": 0.7,
+            },
+            "high_precision_asr": {
+                "provider": "user_stub",
+                "timeout": 30,
+                "silence_threshold": 2.0,
+            },
+            "tts": {
+                "voice": "Samantha",
+                "rate": 200,
+                "use_built_in": True,
+            },
+            "menu_bar": {
+                "auto_open_on_wake": True,
+                "show_error_notifications": True,
+                "show_listening_notifications": False,
+                "conversation_history_limit": 50,
+            },
+        })
 
     @property
     def data_dir(self) -> Path:

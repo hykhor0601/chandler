@@ -1,5 +1,10 @@
 {
   "user_profile": {},
-  "facts": {},
+  "facts": {
+    "first_name": "Huai Yuen",
+    "last_name": "Khor",
+    "nickname": "HY",
+    "nickname_used_by": "friends"
+  },
   "conversation_summaries": []
 }

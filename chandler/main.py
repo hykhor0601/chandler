@@ -1,6 +1,8 @@
 """Chandler - Personal AI Assistant entry point."""
 
 import sys
+import signal
+import atexit
 
 from chandler.config import config
 from chandler.memory import memory
@@ -15,6 +17,9 @@ import chandler.tools.file_ops        # noqa: F401
 import chandler.tools.system_control  # noqa: F401
 import chandler.tools.computer_use    # noqa: F401
 import chandler.tools.memory_tools    # noqa: F401
+import chandler.tools.ai_news         # noqa: F401
+import chandler.tools.mode_control    # noqa: F401
+import chandler.tools.profile_tools   # noqa: F401
 
 
 def _ensure_api_key():
@@ -37,12 +42,38 @@ def _ensure_api_key():
     ui.print_info("API key saved to ~/.chandler/config.yaml")
 
 
+def setup_signal_handlers(brain):
+    """Setup signal handlers for graceful shutdown.
+
+    Args:
+        brain: Brain instance to finalize on shutdown
+    """
+    def shutdown_handler(signum, frame):
+        ui.print_info("\n\nShutting down gracefully... Session saved. Goodbye!")
+        brain.finalize_session()
+        memory.fact_worker.stop()
+        sys.exit(0)
+
+    # Register handlers for SIGINT (Ctrl+C) and SIGTERM
+    signal.signal(signal.SIGINT, shutdown_handler)
+    signal.signal(signal.SIGTERM, shutdown_handler)
+
+    # Fallback: atexit handler
+    atexit.register(lambda: brain.finalize_session())
+
+
 def main():
     """Main REPL loop."""
     _ensure_api_key()
 
     from chandler.brain import Brain
     brain = Brain()
+
+    # Start a new session
+    brain.session_id = memory.start_session()
+
+    # Setup graceful shutdown handlers
+    setup_signal_handlers(brain)
 
     ui.print_welcome()
 
@@ -55,6 +86,9 @@ def main():
         # Handle commands
         cmd = user_input.strip().lower()
         if cmd in ("/quit", "/exit", "quit", "exit"):
+            ui.print_info("Saving session and shutting down...")
+            brain.finalize_session()
+            memory.fact_worker.stop()
             ui.print_info("Goodbye!")
             break
         elif cmd == "/clear":
@@ -63,6 +97,13 @@ def main():
             continue
         elif cmd == "/memory":
             ui.print_memory(memory.all_data)
+            continue
+        elif cmd == "/mode":
+            ui.print_info(f"Current mode: {brain.get_mode_status()}")
+            continue
+        elif cmd == "/profile":
+            profile_summary = memory.user_profile.get_summary()
+            ui.print_profile(profile_summary)
             continue
         elif cmd == "/help":
             ui.print_help()
